@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cuponfy - Customer Loyalty</title>
+
+  <!-- Import Roboto font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Import Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Import AOS CSS for animations -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
+  <style>
+    /* CSS Variables for Light Theme */
+    :root {
+      --color-primary-main: #4B0082; /* Indigo */
+      --color-primary-light: #9A32CD; /* Dark Orchid */
+      --color-primary-dark: #310B5E; /* Darker Indigo */
+      --color-primary-contrast: #FFFFFF;
+
+      --color-secondary-main: #C71585; /* Medium Violet Red */
+      --color-secondary-light: #FF69B4; /* Hot Pink */
+      --color-secondary-dark: #8B008B; /* Dark Magenta */
+      --color-secondary-contrast: #FFFFFF;
+
+      --color-background-default: #FAF3FF; /* Lavender Blush */
+      --color-background-paper: #FFFFFF;
+
+      --color-text-primary: #1C1C1C; /* Nearly Black */
+      --color-text-secondary: #4F4F4F; /* Dark Gray */
+
+      --font-family: 'Roboto', Arial, sans-serif;
+
+      /* Material Design Elevation Shadows */
+      --shadow-elevation-1: 0px 2px 8px rgba(0,0,0,0.15);
+      --shadow-elevation-3: 0px 8px 24px rgba(0,0,0,0.2);
+    }
+
+    /* CSS Variables for Dark Theme */
+    .dark-theme {
+      --color-primary-main: #9A32CD; /* Dark Orchid */
+      --color-primary-light: #C873E1; /* Light Orchid */
+      --color-primary-dark: #6D2393; /* Darker Orchid */
+      --color-primary-contrast: #FFFFFF;
+
+      --color-secondary-main: #FF69B4; /* Hot Pink */
+      --color-secondary-light: #FF8AC1; /* Lighter Pink */
+      --color-secondary-dark: #C71585; /* Medium Violet Red */
+      --color-secondary-contrast: #FFFFFF;
+
+      --color-background-default: #1C1C1C; /* Nearly Black */
+      --color-background-paper: #2F2F2F; /* Dark Gray */
+
+      --color-text-primary: #FFFFFF; /* White */
+      --color-text-secondary: #CCCCCC; /* Light Gray */
+    }
+
+    /* General Styles */
+    body {
+      background-color: var(--color-background-default);
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      color: var(--color-text-primary);
+      scroll-behavior: smooth;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Navigation Styles */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: var(--color-background-paper);
+      box-shadow: var(--shadow-elevation-1);
+      z-index: 1000;
+      transition: background-color 0.3s;
+    }
+
+    .navbar-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--color-primary-main);
+      cursor: pointer;
+    }
+
+    .navbar-menu {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .navbar-menu a {
+      text-decoration: none;
+      color: var(--color-text-primary);
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .navbar-menu a:hover {
+      color: var(--color-primary-main);
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      font-size: 1.8rem;
+      transition: color 0.3s;
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+    }
+
+    .theme-toggle:hover {
+      color: var(--color-primary-main);
+    }
+
+    /* Language Toggle Button */
+    .language-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      font-weight: 600;
+      font-size: 1rem;
+      transition: color 0.3s;
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+    }
+
+    .language-toggle:hover {
+      color: var(--color-primary-main);
+    }
+
+    /* Hero Section with Slider */
+    .hero-section {
+      position: relative;
+      margin-top: 60px; /* To avoid being covered by the navbar */
+      overflow: hidden;
+      height: 600px;
+    }
+
+    .slider {
+      position: relative;
+      height: 100%;
+    }
+
+    .slides {
+      display: flex;
+      width: 300%;
+      height: 100%;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .slide {
+      width: 100%;
+      flex-shrink: 0;
+      height: 100%;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      color: var(--color-primary-contrast);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* Individual Slides */
+    .slide1 {
+      background-image: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-light));
+    }
+
+    .slide2 {
+      background-image: linear-gradient(135deg, var(--color-secondary-dark), var(--color-secondary-light));
+    }
+
+    .slide3 {
+      background-image: linear-gradient(135deg, var(--color-primary-main), var(--color-secondary-main));
+    }
+
+    .slide h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .slide p {
+      font-size: 1.2rem;
+      margin-top: 15px;
+      max-width: 800px;
+    }
+
+    .slide .section-buttons {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    /* Slider Navigation Arrows */
+    .slider-nav {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .slider-nav button {
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: var(--color-primary-contrast);
+      font-size: 2rem;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+
+    .slider-nav button:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 4px;
+      background: linear-gradient(45deg, var(--color-primary-main), var(--color-secondary-main));
+      color: var(--color-primary-contrast);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-elevation-1);
+      outline: none;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: linear-gradient(45deg, var(--color-primary-dark), var(--color-secondary-dark));
+      box-shadow: var(--shadow-elevation-3);
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Section Titles */
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+      color: var(--color-primary-main);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--color-primary-main), var(--color-secondary-main));
+      border-radius: 2px;
+    }
+
+    /* Steps Grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+    }
+
+    .step-card {
+      background-color: var(--color-background-paper);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-1);
+      padding: 30px;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-elevation-3);
+      background-color: var(--color-primary-light);
+    }
+
+    /* Step Icon */
+    .step-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background-color: var(--color-primary-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px auto;
+      color: var(--color-primary-contrast);
+      font-size: 36px;
+      box-shadow: var(--shadow-elevation-1);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .step-card:hover .step-icon {
+      background-color: var(--color-secondary-main);
+      box-shadow: var(--shadow-elevation-3);
+    }
+
+    /* Step Title */
+    .step-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    /* Step Description */
+    .step-description {
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      outline: none;
+    }
+
+    /* Advanced Features Section */
+    .features-section {
+      background-color: var(--color-background-paper);
+      padding: 60px 20px;
+      margin-top: 60px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-3);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background-color: var(--color-background-paper);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-1);
+      padding: 30px;
+      display: flex;
+      align-items: flex-start;
+      transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+      cursor: pointer;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-elevation-3);
+      background-color: var(--color-primary-light);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--color-secondary-main);
+      color: var(--color-secondary-contrast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .feature-card:hover .feature-icon {
+      background-color: var(--color-primary-main);
+      color: var(--color-primary-contrast);
+    }
+
+    .feature-content h4 {
+      font-size: 1.2rem;
+      color: var(--color-text-primary);
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .feature-content p {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      outline: none;
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+      padding: 60px 20px;
+      background-color: var(--color-background-default);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-3);
+      margin-top: 60px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .testimonial-card {
+      background-color: var(--color-background-paper);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-1);
+      padding: 30px;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-elevation-3);
+      background-color: var(--color-primary-light);
+    }
+
+    .testimonial-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--color-primary-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary-contrast);
+      font-size: 24px;
+      margin: 0 auto 20px auto;
+      box-shadow: var(--shadow-elevation-1);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .testimonial-card:hover .testimonial-avatar {
+      background-color: var(--color-secondary-main);
+      color: var(--color-secondary-contrast);
+    }
+
+    .testimonial-content p {
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .testimonial-author {
+      font-size: 1rem;
+      color: var(--color-primary-main);
+      font-weight: 600;
+      outline: none;
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+      padding: 60px 20px;
+      background-color: var(--color-background-paper);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-3);
+      margin-top: 60px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .pricing-card {
+      background-color: var(--color-background-paper);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-1);
+      padding: 30px;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+      cursor: pointer;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-elevation-3);
+      background-color: var(--color-primary-light);
+    }
+
+    .pricing-title {
+      font-size: 1.5rem;
+      color: var(--color-primary-main);
+      margin-bottom: 20px;
+      outline: none;
+    }
+
+    .pricing-price {
+      font-size: 2rem;
+      color: var(--color-secondary-main);
+      margin-bottom: 20px;
+      outline: none;
+    }
+
+    .pricing-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+      color: var(--color-text-secondary);
+    }
+
+    .pricing-features li {
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .pricing-card .btn {
+      margin-top: 10px;
+    }
+
+    /* Contact Section */
+    .contact-section {
+      padding: 60px 20px;
+      background-color: var(--color-background-default);
+      border-radius: 8px;
+      box-shadow: var(--shadow-elevation-3);
+      margin-top: 60px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .contact-form {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .contact-form input, .contact-form textarea {
+      padding: 12px 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+      background-color: var(--color-background-paper);
+      color: var(--color-text-primary);
+    }
+
+    .contact-form input:focus, .contact-form textarea:focus {
+      border-color: var(--color-primary-main);
+    }
+
+    .contact-form button {
+      padding: 12px 20px;
+      background-color: var(--color-secondary-main);
+      color: var(--color-secondary-contrast);
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: var(--shadow-elevation-1);
+    }
+
+    .contact-form button:hover {
+      background-color: var(--color-secondary-dark);
+      box-shadow: var(--shadow-elevation-3);
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--color-background-paper);
+      padding: 40px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-elevation-1);
+      margin-top: 60px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .footer p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Login and Register Pages */
+    .subpage {
+      display: none;
+      padding: 80px 20px;
+      min-height: calc(100vh - 60px);
+    }
+
+    .subpage.active {
+      display: block;
+    }
+
+    .subpage h2 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--color-primary-main);
+    }
+
+    .form-container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+      font-size: 1rem;
+      background-color: var(--color-background-paper);
+      color: var(--color-text-primary);
+      transition: border-color 0.3s;
+    }
+
+    .form-container input:focus {
+      border-color: var(--color-primary-main);
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 12px 15px;
+      background-color: var(--color-primary-main);
+      color: var(--color-primary-contrast);
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-container button:hover {
+      background-color: var(--color-primary-dark);
+    }
+
+    .back-btn {
+      display: block;
+      margin: 20px auto;
+      text-align: center;
+      color: var(--color-primary-main);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .back-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Smooth Scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .navbar-menu {
+        display: none; /* Hide menu on mobile; a hamburger menu can be implemented */
+      }
+
+      .navbar-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .steps-grid, .features-grid, .testimonials-grid, .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero-section {
+        height: 400px;
+      }
+
+      .slide h1 {
+        font-size: 2.2rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+
+      .step-card, .feature-card, .pricing-card, .testimonial-card {
+        padding: 20px;
+      }
+
+      .step-icon, .feature-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        font-size: 0.9rem;
+      }
+
+      .contact-form {
+        padding: 0 10px;
+      }
+    }
+
+    /* Editable Styles */
+    [contenteditable]:not([contenteditable="false"]) {
+      user-select: none;
+    }
+
+    [contenteditable]:focus {
+      border: 2px dashed var(--color-primary-main);
+      padding: 2px;
+      border-radius: 4px;
+      background-color: rgba(75, 0, 130, 0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo" contenteditable="false" data-key="navbar-logo">Cuponfy</div>
+      <div class="navbar-menu">
+        <a href="#hero-section" contenteditable="false" data-key="nav-home">Home</a>
+        <a href="#features-section" contenteditable="false" data-key="nav-services">Services</a>
+        <a href="#pricing-section" contenteditable="false" data-key="nav-pricing">Pricing</a>
+        <a href="#testimonials-section" contenteditable="false" data-key="nav-testimonials">Testimonials</a>
+        <a href="#contact-section" contenteditable="false" data-key="nav-contact">Contact</a>
+        <!-- Language Toggle Button -->
+        <button class="language-toggle" id="language-toggle">Español</button>
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme">
+          <span class="material-icons" id="theme-icon">brightness_7</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section with Slider -->
+  <section class="hero-section" id="hero-section">
+    <div class="slider">
+      <div class="slides">
+        <!-- Slide 1 -->
+        <div class="slide slide1 active" data-index="0">
+          <h1 contenteditable="false" data-key="slide1-title">Customers Who Return and Recommend</h1>
+          <p contenteditable="false" data-key="slide1-subtitle">Transform your business into the best choice for your customers with Cuponfy</p>
+          <div class="section-buttons">
+            <a href="#" class="btn" id="login-btn" contenteditable="false" data-key="login-btn">Log In</a>
+            <a href="#" class="btn" id="register-btn" contenteditable="false" data-key="register-btn">Sign Up</a>
+          </div>
+        </div>
+        <!-- Slide 2 -->
+        <div class="slide slide2" data-index="1">
+          <h1 contenteditable="false" data-key="slide2-title">Boost Your Sales</h1>
+          <p contenteditable="false" data-key="slide2-subtitle">Engage your customers with personalized promotions and loyalty programs</p>
+          <div class="section-buttons">
+            <a href="#features-section" class="btn" contenteditable="false" data-key="slide2-btn1">Our Services</a>
+            <a href="#pricing-section" class="btn" contenteditable="false" data-key="slide2-btn2">Pricing</a>
+          </div>
+        </div>
+        <!-- Slide 3 -->
+        <div class="slide slide3" data-index="2">
+          <h1 contenteditable="false" data-key="slide3-title">Grow Your Business</h1>
+          <p contenteditable="false" data-key="slide3-subtitle">Leverage our platform to expand your customer base effortlessly</p>
+          <div class="section-buttons">
+            <a href="#contact-section" class="btn" contenteditable="false" data-key="slide3-btn1">Contact Us</a>
+            <a href="#testimonials-section" class="btn" contenteditable="false" data-key="slide3-btn2">Testimonials</a>
+          </div>
+        </div>
+      </div>
+      <!-- Slider Navigation Arrows -->
+      <div class="slider-nav">
+        <button id="prev-slide"><span class="material-icons">chevron_left</span></button>
+        <button id="next-slide"><span class="material-icons">chevron_right</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Container -->
+  <div class="main-container" id="main-content">
+
+    <!-- Steps Section -->
+    <section class="steps-section" id="steps-section">
+      <h2 class="section-title" data-aos="fade-up" contenteditable="false" data-key="steps-title">Retain Your Customers in 4 Simple Steps</h2>
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="step-icon">
+            <span class="material-icons">looks_one</span>
+          </div>
+          <h3 class="step-title" contenteditable="false" data-key="step1-title">Start for Free</h3>
+          <p class="step-description" contenteditable="false" data-key="step1-description">Yes, it's free until we deliver results! Discover the Cuponfy network and leverage the growth of other businesses through partnerships.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="step-icon">
+            <span class="material-icons">looks_two</span>
+          </div>
+          <h3 class="step-title" contenteditable="false" data-key="step2-title">Create Your Promotions</h3>
+          <p class="step-description" contenteditable="false" data-key="step2-description">You choose how to reward your customers. Create coupons redeemable for your users' points and rewards for those who invite their friends.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="step-icon">
+            <span class="material-icons">looks_3</span>
+          </div>
+          <h3 class="step-title" contenteditable="false" data-key="step3-title">Load Points</h3>
+          <p class="step-description" contenteditable="false" data-key="step3-description">When a customer makes a purchase, scan their QR code and load the corresponding points.</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card" data-aos="fade-up" data-aos-delay="400">
+          <div class="step-icon">
+            <span class="material-icons">looks_4</span>
+          </div>
+          <h3 class="step-title" contenteditable="false" data-key="step4-title">Be Chosen Again</h3>
+          <p class="step-description" contenteditable="false" data-key="step4-description">Your promotions notify your customers that you're still thinking of them.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features-section">
+      <h2 class="section-title" data-aos="fade-up" contenteditable="false" data-key="features-title">Services We Offer</h2>
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="feature-icon">
+            <span class="material-icons">stars</span>
+          </div>
+          <div class="feature-content">
+            <h4 contenteditable="false" data-key="feature1-title">Customizable Points System</h4>
+            <p contenteditable="false" data-key="feature1-description">Configure how your customers earn and redeem points in a flexible way adapted to your business.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="feature-icon">
+            <span class="material-icons">group_add</span>
+          </div>
+          <div class="feature-content">
+            <h4 contenteditable="false" data-key="feature2-title">Referral Campaigns</h4>
+            <p contenteditable="false" data-key="feature2-description">Encourage your customers to invite their friends and quickly expand your customer base.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="feature-icon">
+            <span class="material-icons">insights</span>
+          </div>
+          <div class="feature-content">
+            <h4 contenteditable="false" data-key="feature3-title">Analytics and Reports</h4>
+            <p contenteditable="false" data-key="feature3-description">Get detailed information about your customers' behavior and the performance of your promotions.</p>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+          <div class="feature-icon">
+            <span class="material-icons">support_agent</span>
+          </div>
+          <div class="feature-content">
+            <h4 contenteditable="false" data-key="feature4-title">Dedicated Support</h4>
+            <p contenteditable="false" data-key="feature4-description">Our team is ready to help you at any time to ensure your success.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section" id="testimonials-section">
+      <h2 class="section-title" data-aos="fade-up" contenteditable="false" data-key="testimonials-title">Testimonials</h2>
+      <div class="testimonials-grid">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="testimonial-avatar" contenteditable="false" data-key="testimonial1-avatar">A</div>
+          <div class="testimonial-content">
+            <p contenteditable="false" data-key="testimonial1-content">"Cuponfy has transformed the way we interact with our customers. The promotions are a resounding success!"</p>
+            <div class="testimonial-author" contenteditable="false" data-key="testimonial1-author">Anna Smith</div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="testimonial-avatar" contenteditable="false" data-key="testimonial2-avatar">J</div>
+          <div class="testimonial-content">
+            <p contenteditable="false" data-key="testimonial2-content">"Integration was simple, and the dedicated support really makes a difference. Highly recommended!"</p>
+            <div class="testimonial-author" contenteditable="false" data-key="testimonial2-author">John Doe</div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="testimonial-avatar" contenteditable="false" data-key="testimonial3-avatar">M</div>
+          <div class="testimonial-content">
+            <p contenteditable="false" data-key="testimonial3-content">"Thanks to Cuponfy, we have seen a significant increase in customer loyalty. Incredible tool!"</p>
+            <div class="testimonial-author" contenteditable="false" data-key="testimonial3-author">Maria Lopez</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing-section">
+      <h2 class="section-title" data-aos="fade-up" contenteditable="false" data-key="pricing-title">How Much Does It Cost?</h2>
+      <p data-aos="fade-up" data-aos-delay="100" contenteditable="false" data-key="pricing-description">We have a single plan. You start without paying, the monthly subscription is activated after getting results so you can try all the features, and we only charge you if it works for you. As easy to cancel as it is to activate.</p>
+      <div class="pricing-grid">
+        <!-- Single Plan -->
+        <div class="pricing-card" data-aos="fade-up" data-aos-delay="200">
+          <h3 class="pricing-title" contenteditable="false" data-key="plan-title">Single Plan</h3>
+          <div class="pricing-price" contenteditable="false" data-key="plan-price">$49/month</div>
+          <ul class="pricing-features">
+            <li contenteditable="false" data-key="plan-feature1">Full access to all features</li>
+            <li contenteditable="false" data-key="plan-feature2">Dedicated 24/7 support</li>
+            <li contenteditable="false" data-key="plan-feature3">Advanced analytics and reports</li>
+            <li contenteditable="false" data-key="plan-feature4">Unlimited referral campaigns</li>
+          </ul>
+          <a href="#contact-section" class="btn" contenteditable="false" data-key="plan-btn">Contact to Start</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact-section">
+      <h2 class="section-title" data-aos="fade-up" contenteditable="false" data-key="contact-title">Contact</h2>
+      <form class="contact-form" data-aos="fade-up" data-aos-delay="100">
+        <input type="text" placeholder="Name" required data-key="contact-name">
+        <input type="email" placeholder="Email" required data-key="contact-email">
+        <textarea rows="5" placeholder="Message" required data-key="contact-message"></textarea>
+        <button type="submit" data-key="contact-btn">Send Message</button>
+      </form>
+    </section>
+
+  </div>
+
+  <!-- Login Subpage -->
+  <div class="subpage" id="login-page">
+    <h2 contenteditable="false" data-key="login-title">Log In</h2>
+    <div class="form-container">
+      <input type="email" placeholder="Email" required data-key="login-email">
+      <input type="password" placeholder="Password" required data-key="login-password">
+      <button type="submit" data-key="login-btn">Log In</button>
+      <a href="#" class="back-btn" id="back-btn1" data-key="back-home">Back to Home</a>
+    </div>
+  </div>
+
+  <!-- Register Subpage -->
+  <div class="subpage" id="register-page">
+    <h2 contenteditable="false" data-key="register-title">Sign Up</h2>
+    <div class="form-container">
+      <input type="text" placeholder="Name" required data-key="register-name">
+      <input type="email" placeholder="Email" required data-key="register-email">
+      <input type="password" placeholder="Password" required data-key="register-password">
+      <button type="submit" data-key="register-btn">Create Account</button>
+      <a href="#" class="back-btn" id="back-btn2" data-key="back-home">Back to Home</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p contenteditable="false" data-key="footer-text">&copy; 2024 Cuponfy. All rights reserved.</p>
+  </footer>
+
+  <!-- Import AOS JS for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+  <!-- JavaScript for Theme, Language, Slider, and Navigation -->
+  <script>
+    // Initialize AOS
+    AOS.init({
+      duration: 800, // Animation duration
+      easing: 'ease-in-out',
+      once: true, // Animate only once
+    });
+
+    // Theme Toggle Functionality
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+    if (currentTheme) {
+      document.body.classList.add(currentTheme);
+      if (currentTheme === 'dark-theme') {
+        themeIcon.textContent = 'brightness_4'; // Moon icon
+      } else {
+        themeIcon.textContent = 'brightness_7'; // Sun icon
+      }
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+
+      let theme = 'light-theme';
+      if (document.body.classList.contains('dark-theme')) {
+        theme = 'dark-theme';
+        themeIcon.textContent = 'brightness_4'; // Moon icon
+      } else {
+        themeIcon.textContent = 'brightness_7'; // Sun icon
+      }
+
+      localStorage.setItem('theme', theme);
+    });
+
+    // Language Toggle Functionality
+    const languageToggleBtn = document.getElementById('language-toggle');
+    let currentLanguage = localStorage.getItem('language') || 'en';
+
+    const translations = {
+      en: {
+        'navbar-logo': 'Cuponfy',
+        'nav-home': 'Home',
+        'nav-services': 'Services',
+        'nav-pricing': 'Pricing',
+        'nav-testimonials': 'Testimonials',
+        'nav-contact': 'Contact',
+        'slide1-title': 'Customers Who Return and Recommend',
+        'slide1-subtitle': 'Transform your business into the best choice for your customers with Cuponfy',
+        'login-btn': 'Log In',
+        'register-btn': 'Sign Up',
+        'slide2-title': 'Boost Your Sales',
+        'slide2-subtitle': 'Engage your customers with personalized promotions and loyalty programs',
+        'slide2-btn1': 'Our Services',
+        'slide2-btn2': 'Pricing',
+        'slide3-title': 'Grow Your Business',
+        'slide3-subtitle': 'Leverage our platform to expand your customer base effortlessly',
+        'slide3-btn1': 'Contact Us',
+        'slide3-btn2': 'Testimonials',
+        'steps-title': 'Retain Your Customers in 4 Simple Steps',
+        'step1-title': 'Start for Free',
+        'step1-description': 'Yes, it\'s free until we deliver results! Discover the Cuponfy network and leverage the growth of other businesses through partnerships.',
+        'step2-title': 'Create Your Promotions',
+        'step2-description': 'You choose how to reward your customers. Create coupons redeemable for your users\' points and rewards for those who invite their friends.',
+        'step3-title': 'Load Points',
+        'step3-description': 'When a customer makes a purchase, scan their QR code and load the corresponding points.',
+        'step4-title': 'Be Chosen Again',
+        'step4-description': 'Your promotions notify your customers that you\'re still thinking of them.',
+        'features-title': 'Services We Offer',
+        'feature1-title': 'Customizable Points System',
+        'feature1-description': 'Configure how your customers earn and redeem points in a flexible way adapted to your business.',
+        'feature2-title': 'Referral Campaigns',
+        'feature2-description': 'Encourage your customers to invite their friends and quickly expand your customer base.',
+        'feature3-title': 'Analytics and Reports',
+        'feature3-description': 'Get detailed information about your customers\' behavior and the performance of your promotions.',
+        'feature4-title': 'Dedicated Support',
+        'feature4-description': 'Our team is ready to help you at any time to ensure your success.',
+        'testimonials-title': 'Testimonials',
+        'testimonial1-avatar': 'A',
+        'testimonial1-content': '"Cuponfy has transformed the way we interact with our customers. The promotions are a resounding success!"',
+        'testimonial1-author': 'Anna Smith',
+        'testimonial2-avatar': 'J',
+        'testimonial2-content': '"Integration was simple, and the dedicated support really makes a difference. Highly recommended!"',
+        'testimonial2-author': 'John Doe',
+        'testimonial3-avatar': 'M',
+        'testimonial3-content': '"Thanks to Cuponfy, we have seen a significant increase in customer loyalty. Incredible tool!"',
+        'testimonial3-author': 'Maria Lopez',
+        'pricing-title': 'How Much Does It Cost?',
+        'pricing-description': 'We have a single plan. You start without paying, the monthly subscription is activated after getting results so you can try all the features, and we only charge you if it works for you. As easy to cancel as it is to activate.',
+        'plan-title': 'Single Plan',
+        'plan-price': '$49/month',
+        'plan-feature1': 'Full access to all features',
+        'plan-feature2': 'Dedicated 24/7 support',
+        'plan-feature3': 'Advanced analytics and reports',
+        'plan-feature4': 'Unlimited referral campaigns',
+        'plan-btn': 'Contact to Start',
+        'contact-title': 'Contact',
+        'contact-name': 'Name',
+        'contact-email': 'Email',
+        'contact-message': 'Message',
+        'contact-btn': 'Send Message',
+        'footer-text': '&copy; 2024 Cuponfy. All rights reserved.',
+        'login-title': 'Log In',
+        'login-email': 'Email',
+        'login-password': 'Password',
+        'back-home': 'Back to Home',
+        'register-title': 'Sign Up',
+        'register-name': 'Name',
+        'register-email': 'Email',
+        'register-password': 'Password',
+        'language-toggle': 'Español',
+      },
+      es: {
+        'navbar-logo': 'Cuponfy',
+        'nav-home': 'Inicio',
+        'nav-services': 'Servicios',
+        'nav-pricing': 'Precios',
+        'nav-testimonials': 'Testimonios',
+        'nav-contact': 'Contacto',
+        'slide1-title': 'Clientes que vuelven y recomiendan',
+        'slide1-subtitle': 'Transforma tu negocio en la mejor opción para tus clientes con Cuponfy',
+        'login-btn': 'Iniciar Sesión',
+        'register-btn': 'Registrarse',
+        'slide2-title': 'Impulsa tus Ventas',
+        'slide2-subtitle': 'Involucra a tus clientes con promociones personalizadas y programas de lealtad',
+        'slide2-btn1': 'Nuestros Servicios',
+        'slide2-btn2': 'Precios',
+        'slide3-title': 'Haz Crecer tu Negocio',
+        'slide3-subtitle': 'Aprovecha nuestra plataforma para expandir tu base de clientes sin esfuerzo',
+        'slide3-btn1': 'Contáctanos',
+        'slide3-btn2': 'Testimonios',
+        'steps-title': 'Fideliza a tus Clientes en 4 Sencillos Pasos',
+        'step1-title': 'Comenzá Gratis',
+        'step1-description': 'Sí, es gratis hasta que te demos resultados. ¡Conoce la red Cuponfy y aprovecha el crecimiento de otros locales usando alianzas!',
+        'step2-title': 'Crea tus Promociones',
+        'step2-description': 'Vos elegís cómo recompensar a tus clientes. Creá cupones canjeables por los puntos de tus usuarios y recompensas para quienes invitan a sus amigos.',
+        'step3-title': 'Cargá Puntos',
+        'step3-description': 'Cuando un cliente compra, escaneás su QR y cargás los puntos correspondientes a la compra.',
+        'step4-title': 'Que te Vuelva a Elegir',
+        'step4-description': 'Tus promociones notifican a tus clientes que seguís pensando en ellos.',
+        'features-title': 'Servicios que Ofrecemos',
+        'feature1-title': 'Sistema de Puntos Personalizable',
+        'feature1-description': 'Configurá cómo tus clientes ganan y canjean puntos de manera flexible y adaptada a tu negocio.',
+        'feature2-title': 'Campañas de Referidos',
+        'feature2-description': 'Incentivá a tus clientes a invitar a sus amigos y expandí tu base de clientes rápidamente.',
+        'feature3-title': 'Análisis y Reportes',
+        'feature3-description': 'Obtené información detallada sobre el comportamiento de tus clientes y el rendimiento de tus promociones.',
+        'feature4-title': 'Soporte Dedicado',
+        'feature4-description': 'Nuestro equipo está listo para ayudarte en todo momento para asegurar tu éxito.',
+        'testimonials-title': 'Testimonios',
+        'testimonial1-avatar': 'A',
+        'testimonial1-content': '"Cuponfy ha transformado la manera en que interactuamos con nuestros clientes. ¡Las promociones son un éxito rotundo!"',
+        'testimonial1-author': 'Ana Gómez',
+        'testimonial2-avatar': 'J',
+        'testimonial2-content': '"La integración fue sencilla y el soporte dedicado realmente hace la diferencia. ¡Recomendado al 100%!"',
+        'testimonial2-author': 'Juan Pérez',
+        'testimonial3-avatar': 'M',
+        'testimonial3-content': '"Gracias a Cuponfy, hemos visto un aumento significativo en la lealtad de nuestros clientes. ¡Increíble herramienta!"',
+        'testimonial3-author': 'María López',
+        'pricing-title': '¿Cuánto Sale?',
+        'pricing-description': 'Contamos con un único plan. Comenzás sin pagar, se activa la suscripción mensual tras obtener resultados, para que puedas probar todas las funciones y solo te cobramos si te funciona. Tan fácil de cancelar como de activar.',
+        'plan-title': 'Plan Único',
+        'plan-price': '$49/mes',
+        'plan-feature1': 'Acceso completo a todas las funcionalidades',
+        'plan-feature2': 'Soporte dedicado 24/7',
+        'plan-feature3': 'Análisis y reportes avanzados',
+        'plan-feature4': 'Campañas de referidos ilimitadas',
+        'plan-btn': 'Contacta Para Empezar',
+        'contact-title': 'Contacto',
+        'contact-name': 'Nombre',
+        'contact-email': 'Correo Electrónico',
+        'contact-message': 'Mensaje',
+        'contact-btn': 'Enviar Mensaje',
+        'footer-text': '&copy; 2024 Cuponfy. Todos los derechos reservados.',
+        'login-title': 'Iniciar Sesión',
+        'login-email': 'Correo Electrónico',
+        'login-password': 'Contraseña',
+        'back-home': 'Volver al Inicio',
+        'register-title': 'Registrarse',
+        'register-name': 'Nombre',
+        'register-email': 'Correo Electrónico',
+        'register-password': 'Contraseña',
+        'language-toggle': 'English',
+      }
+    };
+
+    function updateContent(language) {
+      const elements = document.querySelectorAll('[data-key]');
+      elements.forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[language][key]) {
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.placeholder = translations[language][key];
+          } else if (el.tagName === 'BUTTON' && key === 'language-toggle') {
+            el.textContent = translations[language][key];
+          } else {
+            el.innerHTML = translations[language][key];
+          }
+        }
+      });
+    }
+
+    // Initialize language
+    updateContent(currentLanguage);
+    languageToggleBtn.textContent = translations[currentLanguage]['language-toggle'];
+
+    languageToggleBtn.addEventListener('click', () => {
+      currentLanguage = currentLanguage === 'en' ? 'es' : 'en';
+      updateContent(currentLanguage);
+      localStorage.setItem('language', currentLanguage);
+      languageToggleBtn.textContent = translations[currentLanguage]['language-toggle'];
+    });
+
+    // Navigation to Subpages
+    const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const loginPage = document.getElementById('login-page');
+    const registerPage = document.getElementById('register-page');
+    const mainContent = document.getElementById('main-content');
+    const backBtn1 = document.getElementById('back-btn1');
+    const backBtn2 = document.getElementById('back-btn2');
+
+    loginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      mainContent.style.display = 'none';
+      loginPage.classList.add('active');
+      window.scrollTo(0, 0);
+    });
+
+    registerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      mainContent.style.display = 'none';
+      registerPage.classList.add('active');
+      window.scrollTo(0, 0);
+    });
+
+    backBtn1.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginPage.classList.remove('active');
+      mainContent.style.display = 'block';
+    });
+
+    backBtn2.addEventListener('click', (e) => {
+      e.preventDefault();
+      registerPage.classList.remove('active');
+      mainContent.style.display = 'block';
+    });
+
+    // Make content editable on double-click
+    document.querySelectorAll('[contenteditable="false"]').forEach(element => {
+      element.addEventListener('dblclick', () => {
+        element.setAttribute('contenteditable', 'true');
+        element.focus();
+      });
+
+      element.addEventListener('blur', () => {
+        element.setAttribute('contenteditable', 'false');
+      });
+    });
+
+    // Save editable content to localStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      const editableElements = document.querySelectorAll('[contenteditable="true"]');
+
+      // Load saved content
+      editableElements.forEach(el => {
+        const uniqueKey = el.getAttribute('data-key');
+        if (uniqueKey) {
+          const savedContent = localStorage.getItem(uniqueKey);
+          if (savedContent) {
+            el.innerHTML = savedContent;
+          }
+        }
+      });
+
+      // Save content on blur
+      editableElements.forEach(el => {
+        const uniqueKey = el.getAttribute('data-key');
+        if (uniqueKey) {
+          el.addEventListener('blur', () => {
+            localStorage.setItem(uniqueKey, el.innerHTML);
+          });
+        }
+      });
+    });
+
+    // Hero Slider Functionality
+    const slides = document.querySelectorAll('.slide');
+    const prevSlideBtn = document.getElementById('prev-slide');
+    const nextSlideBtn = document.getElementById('next-slide');
+    let currentSlide = 0;
+    let slideInterval;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        if (i === index) {
+          slide.classList.add('active');
+        }
+      });
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    nextSlideBtn.addEventListener('click', () => {
+      nextSlide();
+      resetSlideInterval();
+    });
+
+    prevSlideBtn.addEventListener('click', () => {
+      prevSlide();
+      resetSlideInterval();
+    });
+
+    function startSlideInterval() {
+      slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+    }
+
+    function resetSlideInterval() {
+      clearInterval(slideInterval);
+      startSlideInterval();
+    }
+
+    // Start the slider
+    startSlideInterval();
+  </script>
+</body>
+</html>
