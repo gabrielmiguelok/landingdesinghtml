@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat Modal - Ejemplo UX</title>
+  <!-- Estilos integrados para emular el diseño original -->
+  <style>
+    /* Estilos generales */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+    }
+
+    /* Backdrop */
+    .chatModalBackdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+
+    /* Contenedor principal */
+    .chatModalContainer {
+      width: 400px;
+      max-width: 95%;
+      height: 70vh;
+      max-height: 90vh;
+      background-color: #fff;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Encabezado */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #124ed9;
+      color: #fff;
+      padding: 8px 12px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-left img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .header-title {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    .close-btn {
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 1.2rem;
+    }
+
+    /* Contenedor de mensajes */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+      background-color: #f8f9fc;
+    }
+
+    /* Estilo para cada mensaje */
+    .message {
+      margin-bottom: 0.5rem;
+      max-width: 75%;
+      padding: 0.75rem 1rem;
+      border-radius: 16px 16px 16px 0;
+      background-color: #e1f5fe;
+      color: #181a20;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      clear: both;
+    }
+    .message.user {
+      float: right;
+      background-color: #dcedff;
+      border-radius: 16px 16px 0 16px;
+    }
+    .ctaBox {
+      border: 1px solid #b3d6ff;
+      border-radius: 8px;
+      padding: 0.7rem;
+      margin: 0.5rem 0;
+      color: #181a20;
+      font-weight: bold;
+      background-color: #f0f8ff;
+    }
+
+    /* Contenedor de input (caja de texto y botón) */
+    .inputContainer {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-top: 1px solid #ddd;
+      background-color: #fff;
+    }
+    .inputText {
+      flex: 1;
+      padding: 0.4rem 0.5rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .sendBtn {
+      background-color: #124ed9;
+      color: #fff;
+      border: none;
+      padding: 0 1rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .sendBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Opciones de respuesta rápida */
+    .optionsContainer {
+      margin: 0.5rem 0;
+    }
+    .optionBtn {
+      display: inline-block;
+      margin: 0.2rem;
+      background-color: #dcedff;
+      color: #181a20;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid #bbb;
+    }
+    .optionBtn:hover {
+      background-color: #c5e0f9;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Simulación del "Chat Modal" -->
+<div class="chatModalBackdrop">
+  <div class="chatModalContainer">
+    <!-- Encabezado -->
+    <div class="header">
+      <div class="header-left">
+        <!-- Logo ficticio -->
+        <img src="https://via.placeholder.com/32" alt="Logo Synara" />
+        <div class="header-title">Synara</div>
+      </div>
+      <button class="close-btn" id="closeChat">&times;</button>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="messages" id="messagesContainer"></div>
+
+    <!-- Zona de ingreso de texto -->
+    <div class="inputContainer" id="inputContainer">
+      <input
+        type="text"
+        class="inputText"
+        id="userInput"
+        placeholder="Escribe tu respuesta..."
+      />
+      <button class="sendBtn" id="sendBtn">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Script que simula el flujo de chat en un solo archivo -->
+<script>
+  /*************************************************************
+   * 
+   * 1) Definición de ChatSteps (contenido por estado).
+   * 
+   *************************************************************/
+  const ChatSteps = {
+    DEFAULT: {
+      assistantMessages: [
+        "No comprendí tu solicitud. Por favor, elige una opción o vuelve al menú principal."
+      ],
+      options: ["Menú principal", "Volver", "Finalizar"]
+    },
+    MAIN: {
+      assistantMessages: [
+        "¡Hola! Soy el Asistente de Synara. ¿En qué puedo ayudarte hoy?\n\n- ¿Quieres **saber más** sobre Synara?\n- ¿Te interesan nuestros **planes** y precios?\n- ¿Quieres contactar a un **asesor**?"
+      ],
+      options: ["Saber más", "Planes", "Hablar con asesor"]
+    },
+    MAIN_REVISITED: {
+      assistantMessages: [
+        "¿En qué más puedo ayudarte?\n- **Saber más** de Synara\n- Conocer nuestros **planes**\n- Contactar a un **asesor**"
+      ],
+      options: ["Saber más", "Planes", "Hablar con asesor"]
+    },
+    CONOCER_MAS: {
+      assistantMessages: [
+        "Synara es una solución integral para tu negocio. ¿Quieres **probar gratis** o volver al **Menú principal**?"
+      ],
+      options: ["Quiero probar gratis", "Menú principal"]
+    },
+    DEMO: {
+      assistantMessages: [
+        "Aquí puedes probar una demo de Synara. ¿Quieres **registrarme** o **volver** al Menú principal?"
+      ],
+      options: ["Registrarme", "Volver"]
+    },
+    DEMO_COMPLETADO: {
+      assistantMessages: [
+        "Excelente, gracias por probar la demo.\n¿Deseas volver al **Menú principal** o **finalizar**?"
+      ],
+      options: ["Menú principal", "Finalizar"]
+    },
+    PLANES: {
+      assistantMessages: [
+        "Ofrecemos varios planes: **Esencial**, **Profesional**, y **Corporativo**.\nTambién puedes probar gratis. ¿Qué deseas?"
+      ],
+      options: ["Plan Esencial", "Plan Profesional", "Plan Corporativo", "Prueba gratis"]
+    },
+    PLAN_ESENCIAL: {
+      assistantMessages: [
+        "Plan Esencial: Ideal para PYMES. ¿Deseas **contratar**, más **información**, o volver al **Menú principal**?"
+      ],
+      options: ["Contratar", "Información", "Menú principal"]
+    },
+    PLAN_PROFESIONAL: {
+      assistantMessages: [
+        "Plan Profesional: Para negocios en crecimiento. ¿Deseas **contratar**, más **información**, o volver al **Menú principal**?"
+      ],
+      options: ["Contratar", "Información", "Menú principal"]
+    },
+    PLAN_CORPORATIVO: {
+      assistantMessages: [
+        "Plan Corporativo: La solución más completa. ¿Deseas **contratar**, más **información**, o volver al **Menú principal**?"
+      ],
+      options: ["Contratar", "Información", "Menú principal"]
+    },
+    CONTACTO: {
+      assistantMessages: [
+        "¡Perfecto! Un asesor puede ayudarte. ¿Deseas **registrarme** o volver al **Menú principal**?"
+      ],
+      options: ["Registrarme", "Volver"]
+    },
+    CIERRA_CONVERSACION: {
+      assistantMessages: [
+        "La conversación está por cerrarse.\n¿Volver al **Menú principal** o **finalizar**?"
+      ],
+      options: ["Menú principal", "Finalizar"]
+    },
+    FINAL: {
+      assistantMessages: [
+        "¡Gracias por chatear con Synara! Si deseas iniciar un nuevo chat, escribe: **Iniciar nuevo chat**."
+      ],
+      options: []
+    },
+    /* Secuencia de Formulario */
+    FORM_0_INTRO: {
+      assistantMessages: [
+        "Perfecto, comencemos tu registro. ¿Cuál es tu nombre completo?"
+      ],
+      options: []
+    },
+    FORM_1_EMAIL: {
+      assistantMessages: [
+        "Gracias. ¿Cuál es tu correo electrónico?"
+      ],
+      options: []
+    },
+    FORM_2_PHONE: {
+      assistantMessages: [
+        "¿Podrías proporcionarme tu número de teléfono?"
+      ],
+      options: []
+    },
+    FORM_3_INDUSTRIA: {
+      assistantMessages: [
+        "¿En qué industria principal te desempeñas?"
+      ],
+      options: []
+    },
+    FORM_4_TIPO_PROSPECTOS: {
+      assistantMessages: [
+        "¿Qué tipo de prospectos buscas?"
+      ],
+      options: []
+    },
+    FORM_5_ENFOQUE: {
+      assistantMessages: [
+        "¿Cuál es el enfoque de tu empresa? (Si son varios, sepáralos por comas)"
+      ],
+      options: []
+    },
+    FORM_6_UBICACION: {
+      assistantMessages: [
+        "¿En qué ciudad o región operas principalmente?"
+      ],
+      options: []
+    },
+    FORM_7_DESAFIOS: {
+      assistantMessages: [
+        "¿Cuáles son tus principales desafíos de generación de prospectos? (sepáralos por comas)"
+      ],
+      options: []
+    },
+    FORM_8_METODOS_ACTUALES: {
+      assistantMessages: [
+        "¿Qué métodos usas actualmente para generar prospectos?"
+      ],
+      options: []
+    },
+    FORM_9_TIEMPO_BUSQUEDA: {
+      assistantMessages: [
+        "¿Cuánto tiempo llevas buscando esta solución?"
+      ],
+      options: []
+    },
+    FORM_10_PROSPECTOS_MES: {
+      assistantMessages: [
+        "¿Cuántos prospectos mensuales necesitas aproximadamente?"
+      ],
+      options: []
+    },
+    FORM_11_LOGROS: {
+      assistantMessages: [
+        "¿Qué logros deseas alcanzar con Synara? (lista separada por comas)"
+      ],
+      options: []
+    },
+    FORM_12_TIEMPO_RESULTADOS: {
+      assistantMessages: [
+        "¿En cuánto tiempo esperas ver resultados?"
+      ],
+      options: []
+    },
+    FORM_13_TIPO_DATOS: {
+      assistantMessages: [
+        "¿Qué tipo de datos consideras más relevantes? (sepáralos por comas)"
+      ],
+      options: []
+    },
+    FORM_14_PREFERENCIA_CONTACTO: {
+      assistantMessages: [
+        "¿Cómo prefieres que te contactemos?"
+      ],
+      options: []
+    },
+    FORM_15_PERSONALIZACION: {
+      assistantMessages: [
+        "En una escala del 1 al 100, ¿cuánta personalización deseas (siendo 100 la máxima)?"
+      ],
+      options: []
+    },
+    FORM_16_END: {
+      assistantMessages: [
+        "¡Listo! Gracias por la información.\n¿Volver al Menú principal o **finalizar**?"
+      ],
+      options: ["Menú principal", "Finalizar"]
+    }
+  };
+
+  /*************************************************************
+   * 
+   * 2) Lógica que controla la transición de estados (ChatFlowManager).
+   * 
+   *************************************************************/
+  function ChatFlowManager(currentState, userMessage) {
+    const lowerMsg = userMessage.toLowerCase().trim();
+    let newState = currentState;
+    let stepData = ChatSteps.DEFAULT;
+
+    const setStep = (stepKey) => {
+      newState = stepKey;
+      stepData = ChatSteps[stepKey];
+    };
+
+    const goToMenu = () => {
+      if (currentState === 'MAIN') setStep('MAIN');
+      else setStep('MAIN_REVISITED');
+    };
+
+    let handled = true;
+
+    switch (currentState) {
+      /* =============== MENÚ PRINCIPAL ===================== */
+      case 'MAIN':
+      case 'MAIN_REVISITED':
+        if (/saber más/i.test(lowerMsg)) setStep('CONOCER_MAS');
+        else if (/plan|precio|planes/i.test(lowerMsg)) setStep('PLANES');
+        else if (/asesor/i.test(lowerMsg)) setStep('CONTACTO');
+        else handled = false;
+        break;
+
+      /* =============== "CONOCER MÁS" ====================== */
+      case 'CONOCER_MAS':
+        if (/quiero probar gratis/i.test(lowerMsg)) {
+          setStep('FORM_0_INTRO');
+        } else if (/menú principal|volver/i.test(lowerMsg)) {
+          goToMenu();
+        } else handled = false;
+        break;
+
+      /* =============== DEMO ================================ */
+      case 'DEMO':
+        if (/registrarme/i.test(lowerMsg)) {
+          setStep('FORM_0_INTRO');
+        } else if (/menú principal|volver/i.test(lowerMsg)) {
+          goToMenu();
+        } else handled = false;
+        break;
+
+      case 'DEMO_COMPLETADO':
+        if (/menú principal/i.test(lowerMsg)) goToMenu();
+        else if (/finalizar/i.test(lowerMsg)) setStep('FINAL');
+        else handled = false;
+        break;
+
+      /* =============== PLANES ============================= */
+      case 'PLANES':
+        if (/prueba gratis/i.test(lowerMsg)) {
+          setStep('FORM_0_INTRO');
+        } else if (/esencial/i.test(lowerMsg)) {
+          setStep('PLAN_ESENCIAL');
+        } else if (/profesional/i.test(lowerMsg)) {
+          setStep('PLAN_PROFESIONAL');
+        } else if (/corporativo/i.test(lowerMsg)) {
+          setStep('PLAN_CORPORATIVO');
+        } else handled = false;
+        break;
+
+      case 'PLAN_ESENCIAL':
+      case 'PLAN_PROFESIONAL':
+      case 'PLAN_CORPORATIVO':
+        if (/contratar|sí|información/i.test(lowerMsg)) {
+          setStep('FORM_0_INTRO');
+        } else if (/menú principal|volver/i.test(lowerMsg)) {
+          goToMenu();
+        } else handled = false;
+        break;
+
+      /* =============== CONTACTO =========================== */
+      case 'CONTACTO':
+        if (/registrarme|sí/i.test(lowerMsg)) {
+          setStep('FORM_0_INTRO');
+        } else if (/menú principal|volver/i.test(lowerMsg)) {
+          goToMenu();
+        } else handled = false;
+        break;
+
+      /* =============== CIERRA_CONVERSACION =============== */
+      case 'CIERRA_CONVERSACION':
+        if (/menú principal/i.test(lowerMsg)) goToMenu();
+        else if (/finalizar/i.test(lowerMsg)) setStep('FINAL');
+        else handled = false;
+        break;
+
+      /* =============== FINAL ============================= */
+      case 'FINAL':
+        if (/iniciar nuevo chat|vamos una vez más/i.test(lowerMsg)) setStep('MAIN');
+        else handled = false;
+        break;
+
+      /* =============== FORM-FLOW PASO A PASO ============= */
+      case 'FORM_0_INTRO':
+        setStep('FORM_1_EMAIL');
+        break;
+      case 'FORM_1_EMAIL':
+        setStep('FORM_2_PHONE');
+        break;
+      case 'FORM_2_PHONE':
+        setStep('FORM_3_INDUSTRIA');
+        break;
+      case 'FORM_3_INDUSTRIA':
+        setStep('FORM_4_TIPO_PROSPECTOS');
+        break;
+      case 'FORM_4_TIPO_PROSPECTOS':
+        setStep('FORM_5_ENFOQUE');
+        break;
+      case 'FORM_5_ENFOQUE':
+        setStep('FORM_6_UBICACION');
+        break;
+      case 'FORM_6_UBICACION':
+        setStep('FORM_7_DESAFIOS');
+        break;
+      case 'FORM_7_DESAFIOS':
+        setStep('FORM_8_METODOS_ACTUALES');
+        break;
+      case 'FORM_8_METODOS_ACTUALES':
+        setStep('FORM_9_TIEMPO_BUSQUEDA');
+        break;
+      case 'FORM_9_TIEMPO_BUSQUEDA':
+        setStep('FORM_10_PROSPECTOS_MES');
+        break;
+      case 'FORM_10_PROSPECTOS_MES':
+        setStep('FORM_11_LOGROS');
+        break;
+      case 'FORM_11_LOGROS':
+        setStep('FORM_12_TIEMPO_RESULTADOS');
+        break;
+      case 'FORM_12_TIEMPO_RESULTADOS':
+        setStep('FORM_13_TIPO_DATOS');
+        break;
+      case 'FORM_13_TIPO_DATOS':
+        setStep('FORM_14_PREFERENCIA_CONTACTO');
+        break;
+      case 'FORM_14_PREFERENCIA_CONTACTO':
+        setStep('FORM_15_PERSONALIZACION');
+        break;
+      case 'FORM_15_PERSONALIZACION':
+        setStep('FORM_16_END');
+        break;
+      case 'FORM_16_END':
+        if (/menú principal/i.test(lowerMsg)) goToMenu();
+        else if (/finalizar/i.test(lowerMsg)) setStep('FINAL');
+        else handled = false;
+        break;
+
+      default:
+        handled = false;
+    }
+
+    if (handled && newState !== 'DEFAULT') {
+      return {
+        newState,
+        assistantMessages: stepData.assistantMessages,
+        newOptions: stepData.options,
+      };
+    }
+
+    return {
+      newState: 'DEFAULT',
+      assistantMessages: ChatSteps.DEFAULT.assistantMessages,
+      newOptions: ChatSteps.DEFAULT.options,
+    };
+  }
+
+  /*************************************************************
+   * 
+   * 3) Simulación de un "Componente" para crear mensajes en pantalla.
+   * 
+   *************************************************************/
+  function addMessageToContainer(role, content) {
+    const container = document.getElementById("messagesContainer");
+
+    // Reemplazamos ***...*** por ctaBox (igual que la lógica en React)
+    const parsed = content.replace(/\*\*\*(.*?)\*\*\*/gs, (_, p1) => {
+      return `<div class="ctaBox">${p1}</div>`;
+    });
+
+    const messageEl = document.createElement("div");
+    messageEl.classList.add("message");
+    if (role === "user") {
+      messageEl.classList.add("user");
+    }
+    // Se permite contenido HTML (ctaBox)
+    messageEl.innerHTML = parsed;
+    container.appendChild(messageEl);
+
+    // Forzamos scroll al final
+    container.scrollTop = container.scrollHeight;
+  }
+
+  /*************************************************************
+   * 
+   * 4) Lógica principal para manejar la conversación.
+   * 
+   *************************************************************/
+  let conversation = [];
+  let currentState = "MAIN";
+  let options = [];
+  const userInputEl = document.getElementById("userInput");
+  const sendBtnEl = document.getElementById("sendBtn");
+
+  // Al cargar, mostramos los mensajes iniciales de MAIN
+  window.addEventListener("load", () => {
+    const mainStep = ChatSteps.MAIN;
+    const initialAssistantMsgs = mainStep.assistantMessages;
+    options = mainStep.options;
+
+    initialAssistantMsgs.forEach((msg) => {
+      addMessageToContainer("assistant", msg);
+    });
+
+    // Si hay opciones, mostramos (por conveniencia aquí),
+    // pero lo haremos dinámico en handleFlow
+    if (options.length > 0) {
+      addOptionsToContainer(options);
+    }
+  });
+
+  // Manejo de botón Enviar
+  sendBtnEl.addEventListener("click", handleSendMessage);
+
+  // Manejo de Enter en input
+  userInputEl.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  });
+
+  // Agrega las opciones de respuesta en forma de botones
+  function addOptionsToContainer(optArray) {
+    const container = document.getElementById("messagesContainer");
+    const optionsWrapper = document.createElement("div");
+    optionsWrapper.classList.add("optionsContainer");
+
+    optArray.forEach((op) => {
+      const btn = document.createElement("span");
+      btn.classList.add("optionBtn");
+      btn.textContent = op;
+      btn.addEventListener("click", () => handleOptionSelect(op));
+      optionsWrapper.appendChild(btn);
+    });
+
+    container.appendChild(optionsWrapper);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Limpia cualquier botón de opciones que estuviera visible
+  function clearOptions() {
+    const container = document.getElementById("messagesContainer");
+    const wrappers = container.getElementsByClassName("optionsContainer");
+    Array.from(wrappers).forEach((el) => el.remove());
+  }
+
+  // Enviar mensaje normal (input de texto)
+  function handleSendMessage() {
+    const userMsg = userInputEl.value.trim();
+    if (!userMsg) return;
+
+    addMessageToContainer("user", userMsg);
+    userInputEl.value = "";
+    clearOptions();
+
+    processFlow(userMsg);
+  }
+
+  // Cuando un usuario elige una opción
+  function handleOptionSelect(option) {
+    addMessageToContainer("user", option);
+    clearOptions();
+    processFlow(option);
+  }
+
+  // Procesa la lógica de cambio de estado e imprime los mensajes
+  function processFlow(userMessage) {
+    const flowResult = ChatFlowManager(currentState, userMessage);
+    currentState = flowResult.newState;
+    const newAssistantMsgs = flowResult.assistantMessages;
+    options = flowResult.newOptions;
+
+    // Agregamos mensajes del asistente
+    newAssistantMsgs.forEach((msg) => {
+      addMessageToContainer("assistant", msg);
+    });
+
+    // Si hay nuevas opciones, las mostramos
+    if (options.length > 0) {
+      addOptionsToContainer(options);
+    }
+  }
+
+  // Botón para cerrar (solo cierra la ventana en este ejemplo)
+  document.getElementById("closeChat").addEventListener("click", () => {
+    alert("Esta acción cerraría el chat en producción.");
+  });
+</script>
+</body>
+</html>
